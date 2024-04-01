@@ -1,4 +1,4 @@
-const pool = require("../config/database.config");
+const db = require("../config/database.config");
 const bcrypt = require("bcryptjs");
 
 const register = async (req, res) => {
@@ -10,7 +10,7 @@ const register = async (req, res) => {
     return req.json({ status: 204, error: "Please enter the password" });
   else {
     console.log("your email is : ", email);
-    pool.query(sql, [email], async (err, result) => {
+    db.query(sql, [email], async (err, result) => {
       if (err) throw err;
       if (result[0]) {
         return res.json({
@@ -20,7 +20,7 @@ const register = async (req, res) => {
       } else {
         const hashedPassword = await bcrypt.hash(pswd, 8);
         console.log("your hashedPassword is : ", hashedPassword);
-        pool.query(
+        db.query(
           sql_insert,
           {
             email: email,

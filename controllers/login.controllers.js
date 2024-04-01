@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const pool = require("../config/database.config");
+const db = require("../config/database.config");
 const bcrypt = require("bcryptjs");
 
 const login = async (req, res) => {
@@ -11,7 +11,7 @@ const login = async (req, res) => {
       error: "Please enter the email & password",
     });
   else {
-    pool.query(sql, [email], async (err, result) => {
+    db.query(sql, [email], async (err, result) => {
       if (err) throw err;
       if (!result[0] || !(await bcrypt.compare(password, result[0].password)))
         return res.json({

@@ -1,5 +1,5 @@
 const express = require("express");
-// const pool = require("./config/database.config");
+// const db = require("./config/database.config");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const app = express();

@@ -1,4 +1,4 @@
-const pool = require("../config/database.config");
+const db = require("../config/database.config");
 const jwt = require("jsonwebtoken");
 
 const loggedIn = async (req, res) => {
@@ -6,7 +6,7 @@ const loggedIn = async (req, res) => {
   try {
     const sql = 'SELECT * FROM admins WHERE id= ?' ;
     const decoded = jwt.verify(req.cookies.adminRegistered, process.env.JWT_SECRET_KEY);
-    pool.query(sql, [decoded.id], (err, result)=>{
+    db.query(sql, [decoded.id], (err, result)=>{
         if(err) throw next();
         req.admin = result[0];
         return next();

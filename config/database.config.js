@@ -1,17 +1,15 @@
-const mysql = require("mysql2");
+const mysql = require("mysql");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const pool = mysql.createPool({
+const db = mysql.createConnection({
   host: process.env.DATABASE_HOST,
   user: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE,
-  port: process.env.PORT,
-  debug: true,
 });
 
-pool.getConnection((err, connection) => {
+db.connect((err) => {
   if (err) {
     console.error("🚀 ~ DATABASE ~ connection: ERROR", err);
   } else {
@@ -19,4 +17,9 @@ pool.getConnection((err, connection) => {
   }
 });
 
-module.exports = pool;
+// error checking connection error for all the databases
+db.on("error", (err) => {
+  console.error("🚀 ~ DATABASE ~ connection: ERROR", err);
+});
+
+module.exports = db;
