@@ -1,5 +1,4 @@
 const express = require("express");
-// const db = require("./config/database.config");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const app = express();
@@ -9,6 +8,14 @@ app.use(cookieParser());
 app.use(express.json());
 app.use("/", require("./routes/admin.routes"));
 app.use("/api", require("./routes/admin.routes"));
+
+app.use(
+  cors({
+    origin: ["http://localhost:3000"],
+    methods: ["POST", "GET"],
+    credentials: true,
+  })
+);
 
 app.use(
   express.urlencoded({

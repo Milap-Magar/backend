@@ -16,49 +16,77 @@ exports.isAdmin = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { email, password: pswd } = req.body;
-  const sql = "SELECT * FROM admins WHERE email=?";
-  if (!email)
-    return res.json({
-      status: 204,
-      error: "Please enter the email & password",
-    });
-  else {
-    db.query(sql, [email], async (err, result) => {
-      if (err) throw err;
-      if (!result[0] || !(await bcrypt.compare(password, result[0].password)))
-        return res.json({
-          status: 404,
-          error: "Incorrect Email or Password",
-        });
-      else {
-        const token = jwt.sign(
-          { id: result[0].id },
-          process.env.JWT_SECRET_KEY,
-          {
-            expiresIn: process.env.JWT_EXPIRES,
+  const { email, password } = req.body;
+
+  // axios.defaults.withCredentials = true;
+
+  // console.log(email, password);
+  try {
+    if (!email || !password) {
+      return res.json({
+        status: 400,
+        error: "Please provide both email and password",
+      });
+    }
+    const sql = "SELECT * FROM admins WHERE email=?";
+    await db.query(sql, [email], (err, data) => {
+      if (data.length > 0) {
+        bcrypt.compare(
+          password.toString(),
+          data[0].password,
+          (err, response) => {
+            if (err)
+              return response.json({
+                status: 400,
+                error: "Password Compare Error",
+              });
+            if (response) {
+              const name = data[0].name;
+              const token = jwt.sign({ name }, process.env.JWT_SECRET_KEY, {
+                expiresIn: process.env.JWT_EXPIRES,
+              });
+
+              res.cookie('token', token);
+
+              // const cookieOptions = {
+              //   expires: new Date(
+              //     Date.now() + process.env.COOKIE_EXPIRES * 24 * 60 * 60 * 1000
+              //   ),
+              //   httpOnly: true,
+              // };
+
+              return res.json({
+                status: 200,
+                success: "Logged in successfully",
+              });
+            } else {
+              return res.json({ status: 401, message: "Error" });
+            }
           }
         );
-        const cookieOptions = {
-          expiresIn: new Date(
-            Date.now() + process.env.COOKIE_EXPIRES * 24 * 60 * 60 * 1000
-          ),
-          httpOnly: true,
-        };
-        res.cookie("adminRegistered", token, cookieOptions);
-        return res.json({ status: 200, success: "Admin has been logged in" });
+      } else {
+        return res.json({ status: 401, err: "No Data" });
       }
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.json({
+      status: 500,
+      error: "An error occurred while processing your request",
     });
   }
 };
 
 exports.register = async (req, res) => {
-  const { email, password: pswd } = req.body;
-  const sql = "SELECT email FROM admins WHERE email = ?";
-  const sql_insert = "INSERT into admins SET ?";
+  const { email, password: pswd, name, phone, address } = req.body;
 
-  if (!email || !pswd)
+  if (!email || !pswd) {
     return res.status(400).json({ error: "Please enter email and password" });
+  }
+
+  const sql = "SELECT email FROM admins WHERE email = ?";
+  const sql_insert =
+    "INSERT INTO admins (email, password, name, phone, address) VALUES (?, ?, ?, ?, ?)";
 
   db.query(sql, [email], async (err, result) => {
     if (err) {
@@ -72,14 +100,12 @@ exports.register = async (req, res) => {
     }
     try {
       const hashedPassword = await bcrypt.hash(pswd, 8);
-      await db.query(sql_insert, {
-        email: email,
-        password: hashedPassword,
-      });
-      return res.status(200).json({ success: "User has been registered" });
+      const adminData = [email, hashedPassword, name, phone, address]; // Values array
+      await db.query(sql_insert, adminData);
+      return res.status(200).json({ success: "admin has been registered" });
     } catch (error) {
-      console.error("Error while registering user:", error);
-      return res.status(500).json({ error: "Error while registering user" });
+      console.error("Error while registering admin:", error);
+      return res.status(500).json({ error: "Error while registering admin" });
     }
   });
 };
@@ -88,3 +114,6 @@ exports.logout = (req, res) => {
   res.clearCookie("adminRegistered");
   res.redirect("/");
 };
+
+// const adminRows = result && result.length ? result[0] : null;
+// // console.log(adminRows)
