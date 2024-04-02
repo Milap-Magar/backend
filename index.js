@@ -7,8 +7,8 @@ const app = express();
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
-app.use("/", require("./routes/page.routes"));
-app.use("/api", require("./controllers/auth.controllers"));
+app.use("/", require("./routes/admin.routes"));
+app.use("/api", require("./routes/admin.routes"));
 
 app.use(
   express.urlencoded({

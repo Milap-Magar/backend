@@ -21,5 +21,4 @@ function validate(values){
     }else{
         error.password = "";
     }
-
 }
