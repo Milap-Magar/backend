@@ -15,71 +15,6 @@ exports.isAdmin = async (req, res) => {
   }
 };
 
-// exports.login = async (req, res) => {
-//   const { email, password } = req.body;
-
-//   // axios.defaults.withCredentials = true;
-
-//   // console.log(email, password);
-//   try {
-//     if (!email && !password) {
-//       return res.json({
-//         status: 400,
-//         error: "Please provide both email and password",
-//       });
-//     }
-//     const sql = "SELECT * FROM admins WHERE email=?";
-//     await db.query(sql, [email], (err, data) => {
-//       if (data.length > 0) {
-//         bcrypt.compare(
-//           password.toString(),
-//           data[0].password,
-//           (err, response) => {
-//             if (err)
-//               return response.json({
-//                 status: 400,
-//                 error: "Password Compare Error",
-//               });
-//             if (response) {
-//               const name = data[0].name;
-//               const token = jwt.sign({ name }, process.env.JWT_SECRET_KEY, {
-//                 expiresIn: process.env.JWT_EXPIRES,
-//               });
-
-//               res.cookie('token', token);
-
-//               // const cookieOptions = {
-//               //   expires: new Date(
-//               //     Date.now() + process.env.COOKIE_EXPIRES * 24 * 60 * 60 * 1000
-//               //   ),
-//               //   httpOnly: true,
-//               // };
-
-//               return res.json({
-//                 status: 200,
-//                 success: "Logged in successfully",
-//               });
-//             } else {
-//               return res.json({ status: 401, message: "Error" });
-//             }
-//           }
-//         );
-//       } else {
-//         return res.json({ status: 401, err: "No Data" });
-//       }
-//     });
-//   } catch (error) {
-//     console.error("Login error:", error);
-//     return res.json({
-//       status: 500,
-//       error: "An error occurred while processing your request",
-//     });
-//   }
-// };
-
-// const bcrypt = require('bcrypt');
-// const jwt = require('jsonwebtoken');
-
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -96,13 +31,11 @@ exports.login = async (req, res) => {
       // console.log(result);
       // console.log(result.name);
       if (err) {
-        // Handle error
         console.error("Database query error:", err);
         return;
       }
       if (results.length > 0) {
         const rows = results[0];
-        // console.log(rows.name);
         console.log(password, rows.password);
         bcrypt.compare(password, rows.password, async (err, response) => {
           if (err) {
@@ -139,40 +72,6 @@ exports.login = async (req, res) => {
         });
       }
     });
-
-    // if (data.length > 0) {
-    //   bcrypt.compare(password.toString(), data[0].password, (err, response) => {
-    //     if (err) {
-    //       return res.status(500).json({
-    //         status: 500,
-    //         error: "Password Compare Error",
-    //       });
-    //     }
-    //     if (response) {
-    //       const name = data[0].name;
-    //       const token = jwt.sign({ name }, process.env.JWT_SECRET_KEY, {
-    //         expiresIn: process.env.JWT_EXPIRES,
-    //       });
-
-    //       res.cookie("token", token);
-
-    //       return res.status(200).json({
-    //         status: 200,
-    //         success: "Logged in successfully",
-    //       });
-    //     } else {
-    //       return res.status(401).json({
-    //         status: 401,
-    //         message: "Incorrect password",
-    //       });
-    //     }
-    //   });
-    // } else {
-    //   return res.status(401).json({
-    //     status: 401,
-    //     error: "Email not found",
-    //   });
-    // }
   } catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({
@@ -219,6 +118,3 @@ exports.logout = (req, res) => {
   res.clearCookie("adminRegistered");
   res.redirect("/");
 };
-
-// const adminRows = result && result.length ? result[0] : null;
-// // console.log(adminRows)
