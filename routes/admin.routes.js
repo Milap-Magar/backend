@@ -4,7 +4,7 @@ const { login, logout, isAdmin, register } = require("../controllers/admin.contr
 const { getAllAdmins } = require("../model/admin.model");
 const router = express.Router();
 
-router.get("/api/admin", loggedIn, isAdmin, getAllAdmins);
+router.get("/api/loggedin", loggedIn, getAllAdmins);
 
 router.post("/register", register);
 

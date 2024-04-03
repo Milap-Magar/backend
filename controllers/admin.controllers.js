@@ -18,9 +18,6 @@ exports.isAdmin = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
-  // axios.defaults.withCredentials = true;
-
-  // console.log(email, password);
   try {
     if (!email || !password) {
       return res.json({
@@ -45,19 +42,15 @@ exports.login = async (req, res) => {
               const token = jwt.sign({ name }, process.env.JWT_SECRET_KEY, {
                 expiresIn: process.env.JWT_EXPIRES,
               });
-
-              res.cookie('token', token);
-
-              // const cookieOptions = {
-              //   expires: new Date(
-              //     Date.now() + process.env.COOKIE_EXPIRES * 24 * 60 * 60 * 1000
-              //   ),
-              //   httpOnly: true,
-              // };
+              res.cookie("token", token, {
+                maxAge: process.env.COOKIE_EXPIRES * 24 * 60 * 60 * 1000,
+                httpOnly: true,
+              });
 
               return res.json({
                 status: 200,
-                success: "Logged in successfully",
+                token: token,
+                success: "Logged in successfully", 
               });
             } else {
               return res.json({ status: 401, message: "Error" });
@@ -100,7 +93,7 @@ exports.register = async (req, res) => {
     }
     try {
       const hashedPassword = await bcrypt.hash(pswd, 8);
-      const adminData = [email, hashedPassword, name, phone, address]; // Values array
+      const adminData = [email, hashedPassword, name, phone, address];
       await db.query(sql_insert, adminData);
       return res.status(200).json({ success: "admin has been registered" });
     } catch (error) {
