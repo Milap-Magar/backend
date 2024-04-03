@@ -123,6 +123,7 @@ exports.login = async (req, res) => {
             return res.status(200).json({
               status: 200,
               success: "Logged in successfully",
+              token: token,
             });
           } else {
             return res.status(401).json({
