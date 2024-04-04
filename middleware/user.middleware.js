@@ -7,7 +7,7 @@ exports.loggedIn = async (req, res, next) => {
   }
   try {
     const decoded = jwt.verify(req.cookies.token, process.env.JWT_SECRET_KEY);
-    const sql = 'SELECT * FROM admins WHERE id = ?';
+    const sql = 'SELECT * FROM students WHERE id = ?';
     db.query(sql, [decoded.id], (err, result) => {
       if (err) return next(err); 
       req.admin = result[0];

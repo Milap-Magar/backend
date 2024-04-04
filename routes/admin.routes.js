@@ -1,10 +1,17 @@
 const express = require("express");
-const { loggedIn } = require("../middleware/loggedIn.middleware");
-const { login, logout, isAdmin, register } = require("../controllers/admin.controllers");
+const { loggedIn } = require("../middleware/admin.middleware");
+const {
+  login,
+  logout,
+  isAdmin,
+  register,
+} = require("../controllers/admin.controllers");
+const { isUser } = require("../controllers/user.controllers");
 const { getAllAdmins } = require("../model/admin.model");
+// const { getAllUsers } = require("../model/user.model");
 const router = express.Router();
 
-router.get("/api/loggedin", loggedIn, getAllAdmins);
+router.get("/api/loggedin", loggedIn);
 
 router.post("/register", register);
 

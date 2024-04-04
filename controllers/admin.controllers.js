@@ -5,19 +5,18 @@ const bcrypt = require("bcryptjs");
 
 exports.isAdmin = async (req, res) => {
   if (!req.admin) {
-    return res.redirect("/login");
+    return res.redirect("/");
   } else {
     if (req.admin.role === "admin") {
-      return res.redirect("/admin-dashboard");
+      return res.redirect("/admin_dashboard");
     } else {
       return res.redirect("/login");
     }
   }
 };
-
+// admin
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-
   try {
     if (!email || !password) {
       return res.status(400).json({
@@ -25,7 +24,6 @@ exports.login = async (req, res) => {
         error: "Please provide both email and password",
       });
     }
-
     const sql = "SELECT * FROM admins WHERE email=?";
     db.query(sql, [email], async (err, results) => {
       // console.log(result);
@@ -44,7 +42,7 @@ exports.login = async (req, res) => {
               error: "Password Compare Error",
             });
           }
-          console.log(response);
+          // console.log(response);
           if (response) {
             const name = rows.name;
             const token = jwt.sign({ name }, process.env.JWT_SECRET_KEY, {
@@ -56,6 +54,7 @@ exports.login = async (req, res) => {
             return res.status(200).json({
               status: 200,
               success: "Logged in successfully",
+              role: "isUser",
               token: token,
             });
           } else {
@@ -82,36 +81,80 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { email, password: pswd, name, phone, address } = req.body;
+  const { email, password: pswd, symbol, dob, name, phone, address, faculty, semester, role } = req.body;
+  console.log(req.body);
+  if (role == "isAdmin") {
+    if (!email || !pswd) {
+      return res.status(400).json({ error: "Please enter email and password" });
+    }
 
-  if (!email || !pswd) {
-    return res.status(400).json({ error: "Please enter email and password" });
+    const sql = "SELECT email FROM admins WHERE email = ?";
+    const sql_insert =
+      "INSERT INTO admins (email, password, name, phone, address, role) VALUES (?, ?, ?, ?, ?, '?')";
+
+    db.query(sql, [email], async (err, result) => {
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+      if (result[0]) {
+        return res
+          .status(409)
+          .json({ error: "Email has already been registered!" });
+      }
+      try {
+        const hashedPassword = await bcrypt.hash(pswd, 8);
+        const adminData = [email, hashedPassword, name, phone, address]; // Values array
+        await db.query(sql_insert, adminData);
+        return res.status(200).json({ success: "admin has been registered" });
+      } catch (error) {
+        console.error("Error while registering admin:", error);
+        return res.status(500).json({ error: "Error while registering admin" });
+      }
+    });
+  } else if (role == "isUser" || role == "isUsers") {
+    if (!email || !pswd) {
+      return res.status(400).json({ error: "Please enter email and password" });
+    }
+    const sql = "SELECT email FROM students WHERE email = ?";
+
+    db.query(sql, [email], async (err, result) => {
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+      if (result[0]) {
+        return res
+          .status(409)
+          .json({ error: "Email has already been registered!" });
+      }
+      try {
+        const hashedPassword = await bcrypt.hash(pswd, 8);
+        const userData = [
+          email,
+          hashedPassword,
+          symbol,
+          dob,
+          name,
+          phone,
+          address,
+          faculty,
+          semester,
+          role,
+        ];
+        const sql_insert =
+          "INSERT INTO students (email, password, symbol, dob, name, phone, address, faculty, semester, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        await db.query(sql_insert, userData);
+        return res.status(200).json({ success: "User has been registered" });
+      } catch (error) {
+        console.error("Error while registering User:", error);
+        return res.status(500).json({ error: "Error while registering User" });
+      }
+    });
+  } else {
+    res.json({ status: 404, message: "not found" });
   }
-
-  const sql = "SELECT email FROM admins WHERE email = ?";
-  const sql_insert =
-    "INSERT INTO admins (email, password, name, phone, address) VALUES (?, ?, ?, ?, ?)";
-
-  db.query(sql, [email], async (err, result) => {
-    if (err) {
-      console.error("Database error:", err);
-      return res.status(500).json({ error: "Database error" });
-    }
-    if (result[0]) {
-      return res
-        .status(409)
-        .json({ error: "Email has already been registered!" });
-    }
-    try {
-      const hashedPassword = await bcrypt.hash(pswd, 8);
-      const adminData = [email, hashedPassword, name, phone, address]; // Values array
-      await db.query(sql_insert, adminData);
-      return res.status(200).json({ success: "admin has been registered" });
-    } catch (error) {
-      console.error("Error while registering admin:", error);
-      return res.status(500).json({ error: "Error while registering admin" });
-    }
-  });
 };
 
 exports.logout = (req, res) => {
