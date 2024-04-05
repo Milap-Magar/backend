@@ -11,7 +11,7 @@ exports.loggedIn = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     const sql = "SELECT * FROM admins";
-    console.log(sql);
+    // console.log(sql);
     await db.query(sql, [decoded.id], (err, result) => {
       if (err) {
         console.error("Database query error:", err);

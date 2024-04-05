@@ -3,11 +3,11 @@ const { loggedIn } = require("../middleware/admin.middleware");
 const {
   login,
   logout,
-  isAdmin,
+  // isAdmin,
   register,
 } = require("../controllers/admin.controllers");
-const { isUser } = require("../controllers/user.controllers");
-const { getAllAdmins } = require("../model/admin.model");
+// const { isUser } = require("../controllers/user.controllers");
+// const { getAllAdmins } = require("../model/admin.model");
 // const { getAllUsers } = require("../model/user.model");
 const router = express.Router();
 

@@ -6,8 +6,11 @@ const app = express();
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
+
 app.use("/", require("./routes/admin.routes"));
 app.use("/api", require("./routes/admin.routes"));
+
+app.use("/", require("./routes/complain.routes"));
 
 app.use(
   cors({

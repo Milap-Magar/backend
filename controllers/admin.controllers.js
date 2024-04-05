@@ -144,7 +144,6 @@ exports.register = async (req, res) => {
         ];
         const sql_insert =
           "INSERT INTO students (email, password, symbol, dob, name, phone, address, faculty, semester, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
         await db.query(sql_insert, userData);
         return res.status(200).json({ success: "User has been registered" });
       } catch (error) {
